@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.labDetectStatus = new System.Windows.Forms.Label();
             this.labResult = new System.Windows.Forms.Label();
@@ -50,6 +51,7 @@
             this.butOpenFile = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -131,9 +133,10 @@
             // labTime
             // 
             this.labTime.AutoSize = true;
+            this.labTime.Font = new System.Drawing.Font("宋体", 10F);
             this.labTime.Location = new System.Drawing.Point(7, 731);
             this.labTime.Name = "labTime";
-            this.labTime.Size = new System.Drawing.Size(71, 18);
+            this.labTime.Size = new System.Drawing.Size(79, 20);
             this.labTime.TabIndex = 7;
             this.labTime.Text = "labTime";
             // 
@@ -221,7 +224,8 @@
             // 
             // butStopRev
             // 
-            this.butStopRev.Font = new System.Drawing.Font("黑体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.butStopRev.AutoSize = true;
+            this.butStopRev.Font = new System.Drawing.Font("宋体", 9F);
             this.butStopRev.Location = new System.Drawing.Point(24, 207);
             this.butStopRev.Name = "butStopRev";
             this.butStopRev.Size = new System.Drawing.Size(202, 45);
@@ -232,7 +236,8 @@
             // 
             // buttReadyRev
             // 
-            this.buttReadyRev.Font = new System.Drawing.Font("黑体", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.buttReadyRev.AutoSize = true;
+            this.buttReadyRev.Font = new System.Drawing.Font("宋体", 9F);
             this.buttReadyRev.Location = new System.Drawing.Point(24, 154);
             this.buttReadyRev.Name = "buttReadyRev";
             this.buttReadyRev.Size = new System.Drawing.Size(202, 45);
@@ -243,7 +248,8 @@
             // 
             // butConCam
             // 
-            this.butConCam.Font = new System.Drawing.Font("黑体", 9F);
+            this.butConCam.AutoSize = true;
+            this.butConCam.Font = new System.Drawing.Font("宋体", 9F);
             this.butConCam.Location = new System.Drawing.Point(24, 96);
             this.butConCam.Name = "butConCam";
             this.butConCam.Size = new System.Drawing.Size(202, 45);
@@ -254,7 +260,8 @@
             // 
             // butOpenFile
             // 
-            this.butOpenFile.Font = new System.Drawing.Font("黑体", 9F);
+            this.butOpenFile.AutoSize = true;
+            this.butOpenFile.Font = new System.Drawing.Font("宋体", 9F);
             this.butOpenFile.Location = new System.Drawing.Point(24, 48);
             this.butOpenFile.Name = "butOpenFile";
             this.butOpenFile.Size = new System.Drawing.Size(202, 45);
@@ -288,6 +295,12 @@
             this.hSmartWindowResult.Size = new System.Drawing.Size(614, 481);
             this.hSmartWindowResult.TabIndex = 15;
             this.hSmartWindowResult.WindowSize = new System.Drawing.Size(614, 481);
+            // 
+            // timer1
+            // 
+            this.timer1.Enabled = true;
+            this.timer1.Interval = 1000;
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Form1
             // 
@@ -341,6 +354,7 @@
         private System.Windows.Forms.Button butOpenFile;
         private System.Windows.Forms.GroupBox groupBox2;
         private HalconDotNet.HSmartWindowControl hSmartWindowResult;
+        private System.Windows.Forms.Timer timer1;
     }
 }
 

@@ -73,6 +73,8 @@ namespace HZVision
             cameraRetryTimer.Start();
             Task.Run(() => TryConnectCamera());
             this.Load += new EventHandler(temp_Load);
+            textImgNum.Text= saveImageCount.ToString();
+            UpdateTime();
         }
 
         private void InitModbusServer()
@@ -714,6 +716,15 @@ namespace HZVision
                 } 
             }
 
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            UpdateTime();
+        }
+        private void UpdateTime() 
+        {
+            labTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         }
     }
 }
