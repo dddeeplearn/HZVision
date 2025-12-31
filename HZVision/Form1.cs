@@ -39,7 +39,8 @@ namespace HZVision
         private System.Windows.Forms.Timer plcMonitorTimer; // 监控本地寄存器变化
         private short heartbeatValue = 0;
         private int heartbeatCounter = 0;
-
+        private HObject BreakRoi = null;
+        
         // 定义本地寄存器偏移地址
         private const string ADDR_HEARTBEAT = "10"; // 心跳信号 (PC定时写，PLC读)
         private const string ADDR_TRIGGER = "1";   // 触发信号 (PLC写1，PC检测并重置)
@@ -435,11 +436,11 @@ namespace HZVision
                     window.ClearWindow();
                     window.DispObj(ho_displayImage);
 
-                    if (resultContour != null && resultContour.IsInitialized() && resultContour.CountObj() > 0)
+                    if (BreakRoi != null && BreakRoi.IsInitialized() && BreakRoi.CountObj() > 0 && resultStatusText!="OK")
                     {
                         window.SetColor("green");
                         window.SetLineWidth(3);
-                        window.DispObj(resultContour);
+                        window.DispObj(BreakRoi);
                     }
                 }
                 finally
@@ -586,8 +587,16 @@ namespace HZVision
                     hv_ClassNames = hv_ClassIDs.TupleSelect(0);
                     if (hv_ClassNames == "OK")
                     {
-
-                        hv_fragment = 0;
+                        int BreakNum = SmallBreakDetect(ho_Image);
+                        if (BreakNum > 1)
+                        {
+                            hv_fragment = 1;
+                        }
+                        else
+                        {
+                            hv_fragment = 0;
+                        }
+                            
                     }
                     if (hv_ClassNames == "NG")
                     {
@@ -681,6 +690,166 @@ namespace HZVision
             }
 
         }
+        private int SmallBreakDetect(HObject srcImage)
+        {
+            // 此处实现小断裂检测逻辑，返回检测结果代码
+            HObject ho_Image = null, ho_GrayImage = null, ho_Region = null;
+            HObject ho_RegionOpening = null, ho_ConnectedRegions = null;
+            HObject ho_SelectedRegions = null, ho_RegionTrans = null, ho_PolarTransImage = null;
+            HObject ho_Region1 = null, ho_RegionOpening1 = null, ho_ConnectedRegions1 = null;
+            HObject ho_SelectedRegions1 = null, ho_RegionTrans1 = null;
+            HObject ho_ImageReduced = null, ho_ImagePart = null, ho_ImageMean1 = null;
+            HObject ho_ImageMean2 = null, ho_RegionDynThresh = null, ho_ConnectedRegions2 = null;
+            HObject ho_SelectedRegions2 = null, ho_RegionUnion1 = null;
+            HObject ho_RegionDilation = null, ho_RegionUnion = null, ho_ConnectedRegions3 = null;
+            HObject ho_RegionIntersection = null, ho_RegionTrans2 = null;
+            HObject ho_RegionMoved = null, ho_XYTransRegion = null, ho_RegionTrans3 = null;
+            HObject ho_Contours = null;
+
+            // Local control variables 
+
+            HTuple hv_ImageFiles = new HTuple(), hv_Index = new HTuple();
+            HTuple hv_Width = new HTuple(), hv_Height = new HTuple();
+            HTuple hv_Area = new HTuple(), hv_Row = new HTuple(), hv_Column = new HTuple();
+            HTuple hv_Value = new HTuple(), hv_PolarWidth = new HTuple();
+            HTuple hv_PolarHeight = new HTuple(), hv_Row1 = new HTuple();
+            HTuple hv_Column1 = new HTuple(), hv_Row2 = new HTuple();
+            HTuple hv_Column2 = new HTuple(), hv_Number = new HTuple();
+            // Initialize local and output iconic variables 
+            HOperatorSet.GenEmptyObj(out ho_Image);
+            HOperatorSet.GenEmptyObj(out ho_GrayImage);
+            HOperatorSet.GenEmptyObj(out ho_Region);
+            HOperatorSet.GenEmptyObj(out ho_RegionOpening);
+            HOperatorSet.GenEmptyObj(out ho_ConnectedRegions);
+            HOperatorSet.GenEmptyObj(out ho_SelectedRegions);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans);
+            HOperatorSet.GenEmptyObj(out ho_PolarTransImage);
+            HOperatorSet.GenEmptyObj(out ho_Region1);
+            HOperatorSet.GenEmptyObj(out ho_RegionOpening1);
+            HOperatorSet.GenEmptyObj(out ho_ConnectedRegions1);
+            HOperatorSet.GenEmptyObj(out ho_SelectedRegions1);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans1);
+            HOperatorSet.GenEmptyObj(out ho_ImageReduced);
+            HOperatorSet.GenEmptyObj(out ho_ImagePart);
+            HOperatorSet.GenEmptyObj(out ho_ImageMean1);
+            HOperatorSet.GenEmptyObj(out ho_ImageMean2);
+            HOperatorSet.GenEmptyObj(out ho_RegionDynThresh);
+            HOperatorSet.GenEmptyObj(out ho_ConnectedRegions2);
+            HOperatorSet.GenEmptyObj(out ho_SelectedRegions2);
+            HOperatorSet.GenEmptyObj(out ho_RegionUnion1);
+            HOperatorSet.GenEmptyObj(out ho_RegionDilation);
+            HOperatorSet.GenEmptyObj(out ho_RegionUnion);
+            HOperatorSet.GenEmptyObj(out ho_ConnectedRegions3);
+            HOperatorSet.GenEmptyObj(out ho_RegionIntersection);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans2);
+            HOperatorSet.GenEmptyObj(out ho_RegionMoved);
+            HOperatorSet.GenEmptyObj(out ho_XYTransRegion);
+            HOperatorSet.GenEmptyObj(out ho_RegionTrans3);
+            HOperatorSet.GenEmptyObj(out ho_Contours);
+
+            ho_Image = srcImage;
+            hv_Width.Dispose(); hv_Height.Dispose();
+            HOperatorSet.GetImageSize(ho_Image, out hv_Width, out hv_Height);
+            ho_GrayImage.Dispose();
+            HOperatorSet.Rgb1ToGray(ho_Image, out ho_GrayImage);
+            ho_Region.Dispose();
+            HOperatorSet.Threshold(ho_GrayImage, out ho_Region, 240, 255);
+            ho_RegionOpening.Dispose();
+            HOperatorSet.OpeningCircle(ho_Region, out ho_RegionOpening, 20.5);
+            ho_ConnectedRegions.Dispose();
+            HOperatorSet.Connection(ho_RegionOpening, out ho_ConnectedRegions);
+            ho_SelectedRegions.Dispose();
+            HOperatorSet.SelectShapeStd(ho_ConnectedRegions, out ho_SelectedRegions, "max_area",
+                70);
+            ho_RegionTrans.Dispose();
+            HOperatorSet.ShapeTrans(ho_SelectedRegions, out ho_RegionTrans, "outer_circle");
+            //极坐标展开进行滤波检测
+            hv_Area.Dispose(); hv_Row.Dispose(); hv_Column.Dispose();
+            HOperatorSet.AreaCenter(ho_RegionTrans, out hv_Area, out hv_Row, out hv_Column);
+            hv_Value.Dispose();
+            HOperatorSet.RegionFeatures(ho_RegionTrans, "outer_radius", out hv_Value);
+            using (HDevDisposeHelper dh = new HDevDisposeHelper())
+            {
+                hv_PolarWidth.Dispose();
+                HOperatorSet.TupleInt((2 * 3.14) * hv_Value, out hv_PolarWidth);
+            }
+            hv_PolarHeight.Dispose();
+            hv_PolarHeight = 512;
+            using (HDevDisposeHelper dh = new HDevDisposeHelper())
+            {
+                ho_PolarTransImage.Dispose();
+                HOperatorSet.PolarTransImageExt(ho_GrayImage, out ho_PolarTransImage, hv_Row,
+                    hv_Column, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), hv_Value + 256,
+                    hv_Value - 256, hv_PolarWidth, hv_PolarHeight, "bilinear");
+            }
+            ho_Region1.Dispose();
+            HOperatorSet.Threshold(ho_PolarTransImage, out ho_Region1, 200, 255);
+            ho_RegionOpening1.Dispose();
+            HOperatorSet.OpeningRectangle1(ho_Region1, out ho_RegionOpening1, 100, 1);
+            ho_ConnectedRegions1.Dispose();
+            HOperatorSet.Connection(ho_RegionOpening1, out ho_ConnectedRegions1);
+            ho_SelectedRegions1.Dispose();
+            HOperatorSet.SelectShapeStd(ho_ConnectedRegions1, out ho_SelectedRegions1,
+                "max_area", 70);
+            ho_RegionTrans1.Dispose();
+            HOperatorSet.ShapeTrans(ho_SelectedRegions1, out ho_RegionTrans1, "rectangle1");
+            hv_Row1.Dispose(); hv_Column1.Dispose(); hv_Row2.Dispose(); hv_Column2.Dispose();
+            HOperatorSet.SmallestRectangle1(ho_RegionTrans1, out hv_Row1, out hv_Column1,
+                out hv_Row2, out hv_Column2);
+            ho_ImageReduced.Dispose();
+            HOperatorSet.ReduceDomain(ho_PolarTransImage, ho_RegionTrans1, out ho_ImageReduced
+                );
+            ho_ImagePart.Dispose();
+            HOperatorSet.CropDomain(ho_ImageReduced, out ho_ImagePart);
+            ho_ImageMean1.Dispose();
+            HOperatorSet.MeanImage(ho_ImagePart, out ho_ImageMean1, 3, 11);
+            ho_ImageMean2.Dispose();
+            HOperatorSet.MeanImage(ho_ImagePart, out ho_ImageMean2, 251, 11);
+            ho_RegionDynThresh.Dispose();
+            HOperatorSet.DynThreshold(ho_ImageMean1, ho_ImageMean2, out ho_RegionDynThresh,
+                71, "dark");
+            ho_ConnectedRegions2.Dispose();
+            HOperatorSet.Connection(ho_RegionDynThresh, out ho_ConnectedRegions2);
+            ho_SelectedRegions2.Dispose();
+            HOperatorSet.SelectShape(ho_ConnectedRegions2, out ho_SelectedRegions2, "area",
+                "and", 200, 99999);
+            ho_RegionUnion1.Dispose();
+            HOperatorSet.Union1(ho_SelectedRegions2, out ho_RegionUnion1);
+            ho_RegionDilation.Dispose();
+            HOperatorSet.DilationCircle(ho_SelectedRegions2, out ho_RegionDilation, 20.5);
+            ho_RegionUnion.Dispose();
+            HOperatorSet.Union1(ho_RegionDilation, out ho_RegionUnion);
+            ho_ConnectedRegions3.Dispose();
+            HOperatorSet.Connection(ho_RegionUnion, out ho_ConnectedRegions3);
+            ho_RegionIntersection.Dispose();
+            HOperatorSet.Intersection(ho_ConnectedRegions3, ho_RegionUnion1, out ho_RegionIntersection
+                );
+            ho_RegionTrans2.Dispose();
+            HOperatorSet.ShapeTrans(ho_RegionIntersection, out ho_RegionTrans2, "convex");
+            ho_RegionMoved.Dispose();
+            HOperatorSet.MoveRegion(ho_RegionTrans2, out ho_RegionMoved, hv_Row1, hv_Column1);
+            hv_Number.Dispose();
+            HOperatorSet.CountObj(ho_RegionMoved, out hv_Number);
+            using (HDevDisposeHelper dh = new HDevDisposeHelper())
+            {
+                ho_XYTransRegion.Dispose();
+                HOperatorSet.PolarTransRegionInv(ho_RegionMoved, out ho_XYTransRegion, hv_Row,
+                    hv_Column, (new HTuple(0)).TupleRad(), (new HTuple(360)).TupleRad(), hv_Value + 256,
+                    hv_Value - 256, hv_PolarWidth, hv_PolarHeight, hv_Width, hv_Height, "nearest_neighbor");
+            }
+            ho_RegionTrans3.Dispose();
+            HOperatorSet.ShapeTrans(ho_XYTransRegion, out ho_RegionTrans3, "rectangle1");
+            ho_Contours.Dispose();
+            HOperatorSet.GenContourRegionXld(ho_RegionTrans3, out ho_Contours, "border");
+            HOperatorSet.GenEmptyObj(out BreakRoi);
+            BreakRoi = ho_Contours.Clone();
+
+
+
+
+            return hv_Number; // 示例返回值
+        }
+
         private void SafeUpdateUI(string message)
         {
             if (this.InvokeRequired)
