@@ -220,7 +220,19 @@ public class HikvisionCamera : IDisposable
         int nRet = camera.MV_CC_SetCommandValue_NET("TriggerSoftware");
         return nRet == MyCamera.MV_OK;
     }
+    public bool SnapImage()
+    {
+        //MTLogger.Debug("SnapImage触发命令..........");
+        // 触发命令
+        int nRet = camera.MV_CC_SetCommandValue_NET("TriggerSoftware");
+        if (MyCamera.MV_OK != nRet)
+        {
+            //MTLogger.Error($"单张采集触发失败,失败代码：{nRet}");
+            return false;
+        }
 
+        return true;
+    }
     // 设置触发模式的方法
     public void SetTriggerMode(bool on)
     {

@@ -129,6 +129,14 @@ namespace HZVision
                     {
                         SafeUpdateUI("相机软触发失败！");
                         detectionLogger.Info("相机软触发失败！");
+                        if (!hikCamera.Connect("4"))
+                        {
+                            isConnectedToCamera = false;
+                            TryConnectCamera();          // 尝试连接
+                            cameraRetryTimer.Start();    // 开启自动重连监控
+                            modbusServer.Write(ADDR_CamStatus, (short)1);
+                            SafeUpdateUI("相机断开连接，准备重连...");
+                        }
                     }
                 }));
             }
@@ -163,7 +171,10 @@ namespace HZVision
         {
 
         }
+        //private void Form1_Close(object sender, EventArgs e)
+        //{
 
+        //}
         private void butConCam_Click(object sender, EventArgs e)
         {
             if (isConnectedToCamera)
@@ -202,6 +213,7 @@ namespace HZVision
                 modbusServer.Write(ADDR_CamStatus, (short)1);
                 return;
             }
+
             if (hikCamera.Connect("4"))
             {
                 isConnectedToCamera = true;
@@ -353,6 +365,7 @@ namespace HZVision
                 if (modbusServer != null)
                 {
                     modbusServer.Write(ADDR_RESULT, (short)fragmentResult);
+                    SafeUpdateUI($"已发送检测结果：{fragmentResult}");
                 }
                 string resultStatusText = "";
                 //lblResultArea.Text = $"检测结果: {fragmentResult}";
@@ -783,7 +796,7 @@ namespace HZVision
                     hv_Value - 256, hv_PolarWidth, hv_PolarHeight, "bilinear");
             }
             ho_Region1.Dispose();
-            HOperatorSet.Threshold(ho_PolarTransImage, out ho_Region1, 200, 255);
+            HOperatorSet.Threshold(ho_PolarTransImage, out ho_Region1, 70, 255);
             ho_RegionOpening1.Dispose();
             HOperatorSet.OpeningRectangle1(ho_Region1, out ho_RegionOpening1, 100, 1);
             ho_ConnectedRegions1.Dispose();
@@ -801,10 +814,13 @@ namespace HZVision
                 );
             ho_ImagePart.Dispose();
             HOperatorSet.CropDomain(ho_ImageReduced, out ho_ImagePart);
+            HOperatorSet.GenRectangle1(out HObject Rectangle, 0, 0, 30, 5735);
+            HOperatorSet.ReduceDomain(ho_ImagePart, Rectangle, out HObject ho_ImageReduced1);
+
             ho_ImageMean1.Dispose();
-            HOperatorSet.MeanImage(ho_ImagePart, out ho_ImageMean1, 3, 11);
+            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean1, 1, 11);
             ho_ImageMean2.Dispose();
-            HOperatorSet.MeanImage(ho_ImagePart, out ho_ImageMean2, 251, 11);
+            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean2, 251, 11);
             ho_RegionDynThresh.Dispose();
             HOperatorSet.DynThreshold(ho_ImageMean1, ho_ImageMean2, out ho_RegionDynThresh,
                 71, "dark");
@@ -812,7 +828,7 @@ namespace HZVision
             HOperatorSet.Connection(ho_RegionDynThresh, out ho_ConnectedRegions2);
             ho_SelectedRegions2.Dispose();
             HOperatorSet.SelectShape(ho_ConnectedRegions2, out ho_SelectedRegions2, "area",
-                "and", 200, 99999);
+                "and", 300, 99999);
             ho_RegionUnion1.Dispose();
             HOperatorSet.Union1(ho_SelectedRegions2, out ho_RegionUnion1);
             ho_RegionDilation.Dispose();
@@ -894,6 +910,28 @@ namespace HZVision
         private void UpdateTime() 
         {
             labTime.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        }
+
+        private void butSigCapture_Click(object sender, EventArgs e)
+        {
+            bool success = hikCamera.SoftTrigger();
+            if (!success)
+            {
+                SafeUpdateUI("相机软触发失败！");
+                detectionLogger.Info("相机软触发失败！");
+            }
+            else
+            {
+                SafeUpdateUI("相机软触发成功！");
+            }
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            butStopRev_Click(this, EventArgs.Empty);
+            cameraRetryTimer.Stop();     // 停止重连
+            //hikCamera.StopListening();
+            hikCamera.Close();
         }
     }
 }
