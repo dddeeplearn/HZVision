@@ -106,7 +106,9 @@ public class HikvisionCamera : IDisposable
         if (isGrabbing) return;
 
         // 注册回调函数
+
         int nRet = camera.MV_CC_RegisterImageCallBackEx_NET(imageCallbackDelegate, IntPtr.Zero);
+
         if (nRet != MyCamera.MV_OK)
         {
             throw new Exception("注册图像回调失败!");

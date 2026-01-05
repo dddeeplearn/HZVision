@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1;
 using HslCommunication.ModBus;
+using System.Runtime.InteropServices;
 namespace HZVision
 {
     public partial class Form1 : Form
@@ -508,6 +509,7 @@ namespace HZVision
                 MessageBox.Show("保存图片数量最小为10000。");
                 SafeUpdateUI($"设置保存图像数量{saveImageCount}");
             }
+
         }
         private int ProcessImage(Mat srcImage)
 
