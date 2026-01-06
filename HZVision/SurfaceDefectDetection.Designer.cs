@@ -50,9 +50,9 @@
             this.butConCam = new System.Windows.Forms.Button();
             this.butOpenFile = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.butSigCapture = new System.Windows.Forms.Button();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.butSigCapture = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
@@ -281,6 +281,18 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
+            // butSigCapture
+            // 
+            this.butSigCapture.AutoSize = true;
+            this.butSigCapture.Font = new System.Drawing.Font("宋体", 9F);
+            this.butSigCapture.Location = new System.Drawing.Point(9, 230);
+            this.butSigCapture.Name = "butSigCapture";
+            this.butSigCapture.Size = new System.Drawing.Size(202, 45);
+            this.butSigCapture.TabIndex = 8;
+            this.butSigCapture.Text = "单次拍照";
+            this.butSigCapture.UseVisualStyleBackColor = true;
+            this.butSigCapture.Click += new System.EventHandler(this.butSigCapture_Click);
+            // 
             // hSmartWindowResult
             // 
             this.hSmartWindowResult.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -305,19 +317,7 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // butSigCapture
-            // 
-            this.butSigCapture.AutoSize = true;
-            this.butSigCapture.Font = new System.Drawing.Font("宋体", 9F);
-            this.butSigCapture.Location = new System.Drawing.Point(9, 230);
-            this.butSigCapture.Name = "butSigCapture";
-            this.butSigCapture.Size = new System.Drawing.Size(202, 45);
-            this.butSigCapture.TabIndex = 8;
-            this.butSigCapture.Text = "单次拍照";
-            this.butSigCapture.UseVisualStyleBackColor = true;
-            this.butSigCapture.Click += new System.EventHandler(this.butSigCapture_Click);
-            // 
-            // Form1
+            // SurfaceDefectDetection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -331,7 +331,7 @@
             this.Controls.Add(this.groupBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "Form1";
+            this.Name = "SurfaceDefectDetection";
             this.Text = "缺陷检测";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);

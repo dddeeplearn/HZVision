@@ -113,6 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Class1.cs" />
+    <Compile Include="IniFile.cs" />
     <Compile Include="LicenseManager\LicenseHelper.cs" />
     <Compile Include="LicenseManager\LicenseModel.cs" />
     <Compile Include="LicenseManager\MachineCodeHelper.cs" />

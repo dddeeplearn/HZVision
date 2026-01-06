@@ -53,6 +53,9 @@ namespace HZVision
         private delegate void SafeUpdateUIDelegate(string message);
         private int saveImageCount = 50000;
         private bool isConnectedToCamera = false;
+        private readonly string configFilePath;
+        private readonly IniFile iniFile;
+
         public SurfaceDefectDetection()
         {
             InitializeComponent();
@@ -80,6 +83,21 @@ namespace HZVision
             buttReadyRev.Enabled = false;
             butStopRev.Enabled = false;
             butSigCapture.Enabled = false;
+            configFilePath = Path.Combine (AppDomain.CurrentDomain.BaseDirectory,"config.ini");
+            if (!File.Exists(configFilePath))
+            {
+                iniFile = new IniFile(configFilePath);
+                CreateDefaultConfig();
+            }
+            else
+            {
+                iniFile = new IniFile(configFilePath);
+            }
+            int.TryParse(iniFile.Read("SaveImg", "NumSave", "40000"), out saveImageCount);
+            textImgNum.Text = iniFile.Read("SaveImg", "NumSave", "40000");
+            bool.TryParse(iniFile.Read("SaveImg", "Auto", "true"), out bool AutoSave);
+            checkAutoSave.Checked = AutoSave;
+
         }
 
         private void InitModbusServer()
@@ -175,10 +193,6 @@ namespace HZVision
         {
 
         }
-        //private void Form1_Close(object sender, EventArgs e)
-        //{
-
-        //}
         private void butConCam_Click(object sender, EventArgs e)
         {
             if (isConnectedToCamera)
@@ -364,7 +378,8 @@ namespace HZVision
 
                 if (modbusServer != null)
                 {
-                    modbusServer.Write(ADDR_RESULT, (short)fragmentResult);
+                    //modbusServer.Write(ADDR_RESULT, (short)fragmentResult);
+                    modbusServer.Write(ADDR_RESULT, (short)0);
                     SafeUpdateUI($"已发送检测结果：{fragmentResult}");
                 }
                 string resultStatusText = "";
@@ -509,6 +524,7 @@ namespace HZVision
                 SafeUpdateUI($"设置保存图像数量{saveImageCount}");
             }
 
+            iniFile.Write("SaveImg", "NumSave", saveImageCount.ToString());
         }
         private int ProcessImage(Mat srcImage)
 
@@ -933,6 +949,13 @@ namespace HZVision
             cameraRetryTimer.Stop();     // 停止重连
             hikCamera.StopListening();
             hikCamera.Close();
+        }
+        private void CreateDefaultConfig()
+        {
+            // Save设置
+            iniFile.Write("SaveImg", "Auto", "ture");
+            iniFile.Write("SaveImg", "NumSave", "50000");
+            SafeUpdateUI("已创建默认配置文件");
         }
     }
 }
