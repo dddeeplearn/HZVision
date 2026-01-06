@@ -77,6 +77,9 @@ namespace HZVision
             this.Load += new EventHandler(temp_Load);
             textImgNum.Text= saveImageCount.ToString();
             UpdateTime();
+            buttReadyRev.Enabled = false;
+            butStopRev.Enabled = false;
+            butSigCapture.Enabled = false;
         }
 
         private void InitModbusServer()
@@ -182,7 +185,9 @@ namespace HZVision
             {
                 isConnectedToCamera = false;
                 isUserDisconnected = true;   // 设为主动断开
-                butStopRev_Click(this, EventArgs.Empty);
+                //butStopRev_Click(this, EventArgs.Empty);
+                butStopRev.Enabled = false;
+                butSigCapture.Enabled = false;
                 cameraRetryTimer.Stop();     // 停止重连
                 hikCamera.StopListening();
                 hikCamera.Close();
@@ -198,9 +203,9 @@ namespace HZVision
             {
                 //MessageBox.Show("连接相机失败！");
                 isUserDisconnected = false;  // 重置标志位
+                SafeUpdateUI("相机重连...");
                 TryConnectCamera();          // 尝试连接
                 cameraRetryTimer.Start();    // 开启自动重连监控
-                SafeUpdateUI("相机重连...");
             }
         }
         private void TryConnectCamera()
@@ -218,15 +223,19 @@ namespace HZVision
             if (hikCamera.Connect("4"))
             {
                 isConnectedToCamera = true;
+                hikCamera.StartListening();
                 this.Invoke(new Action(() => {
                     butConCam.Text = "断开相机";
                     butConCam.Enabled = true;
                     butConCam.BackColor = Color.FromKnownColor(KnownColor.Control);
-                    buttReadyRev.Enabled = true;
+                    //buttReadyRev.Enabled = true;
+                    butStopRev.Enabled = true;
+                    buttReadyRev.Enabled = false;
+                    butSigCapture.Enabled = true;
                 }));
-                hikCamera.SetTriggerMode(true);
-                hikCamera.SetTriggerSource(1);
-                buttReadyRev_Click(this, EventArgs.Empty);
+                //hikCamera.SetTriggerMode(true);
+                //hikCamera.SetTriggerSource(1);
+                SafeUpdateUI("相机准备就绪，等待外部触发...");
                 UpdateCameraParameters();
                 modbusServer.Write(ADDR_CamStatus, (short)0);
                 cameraRetryTimer.Stop(); // 成功连接后停止重连
@@ -263,27 +272,17 @@ namespace HZVision
         private void buttReadyRev_Click(object sender, EventArgs e)
         {
             hikCamera.StartListening();
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => {
-                    buttReadyRev.Enabled = false;
-                    butStopRev.Enabled = true;
-                    SafeUpdateUI("相机准备就绪，等待外部触发...");
-                }));
-            }
+            buttReadyRev.Enabled = false;
+            butStopRev.Enabled = true;
+            SafeUpdateUI("相机准备就绪，等待外部触发...");
         }
 
         private void butStopRev_Click(object sender, EventArgs e)
         {
             hikCamera.StopListening();
-            if (this.InvokeRequired)
-            {
-                this.Invoke(new Action(() => {
-                    buttReadyRev.Enabled = true;
-                    butStopRev.Enabled = false;
-                    SafeUpdateUI("相机已停止接收。");
-                }));
-            }
+            buttReadyRev.Enabled = true;
+            butStopRev.Enabled = false;
+            SafeUpdateUI("相机已停止接收。");
         }
         private void OnCameraImageGrabbed(Mat grabbedImage)
         {
@@ -930,9 +929,9 @@ namespace HZVision
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            butStopRev_Click(this, EventArgs.Empty);
+            //butStopRev_Click(this, EventArgs.Empty);
             cameraRetryTimer.Stop();     // 停止重连
-            //hikCamera.StopListening();
+            hikCamera.StopListening();
             hikCamera.Close();
         }
     }
