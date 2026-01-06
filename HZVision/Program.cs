@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SurfaceDefectDetection.Auth;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,12 @@ namespace HZVision
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            if (!LicenseHelper.CheckLicense())
+            {
+                Application.Run(new Authorization());
+                return;
+            }
+            Application.Run(new SurfaceDefectDetection());
         }
     }
 }

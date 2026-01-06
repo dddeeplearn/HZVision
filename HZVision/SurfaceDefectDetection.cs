@@ -16,7 +16,7 @@ using HslCommunication.ModBus;
 using System.Runtime.InteropServices;
 namespace HZVision
 {
-    public partial class Form1 : Form
+    public partial class SurfaceDefectDetection : Form
     {
         Class1 C1 = new Class1();
         private ImageSaver OKimageSaver;
@@ -53,7 +53,7 @@ namespace HZVision
         private delegate void SafeUpdateUIDelegate(string message);
         private int saveImageCount = 50000;
         private bool isConnectedToCamera = false;
-        public Form1()
+        public SurfaceDefectDetection()
         {
             InitializeComponent();
             hikCamera = new HikvisionCamera();

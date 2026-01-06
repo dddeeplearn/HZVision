@@ -5,6 +5,8 @@ VisualStudioVersion = 17.14.36429.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HZVision", "HZVision\HZVision.csproj", "{087B463D-945A-4B78-9393-D5A4EA4CB43B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthGeneration", "..\..\Authorization\授权文件生成器\AuthGeneration\AuthGeneration\AuthGeneration.csproj", "{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,14 @@ Global
 		{087B463D-945A-4B78-9393-D5A4EA4CB43B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{087B463D-945A-4B78-9393-D5A4EA4CB43B}.Release|x64.ActiveCfg = Release|x64
 		{087B463D-945A-4B78-9393-D5A4EA4CB43B}.Release|x64.Build.0 = Release|x64
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Debug|x64.Build.0 = Debug|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Release|x64.ActiveCfg = Release|Any CPU
+		{A3753E2A-2314-4A71-B4CA-FFED45A8ED5C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
