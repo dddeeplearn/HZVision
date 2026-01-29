@@ -50,14 +50,12 @@
             this.butConCam = new System.Windows.Forms.Button();
             this.butOpenFile = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.butSigCapture = new System.Windows.Forms.Button();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
-            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // labDetectStatus
@@ -274,24 +272,11 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.butSigCapture);
             this.groupBox2.Location = new System.Drawing.Point(15, 30);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(220, 285);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
-            // 
-            // butSigCapture
-            // 
-            this.butSigCapture.AutoSize = true;
-            this.butSigCapture.Font = new System.Drawing.Font("宋体", 9F);
-            this.butSigCapture.Location = new System.Drawing.Point(9, 230);
-            this.butSigCapture.Name = "butSigCapture";
-            this.butSigCapture.Size = new System.Drawing.Size(202, 45);
-            this.butSigCapture.TabIndex = 8;
-            this.butSigCapture.Text = "单次拍照";
-            this.butSigCapture.UseVisualStyleBackColor = true;
-            this.butSigCapture.Click += new System.EventHandler(this.butSigCapture_Click);
             // 
             // hSmartWindowResult
             // 
@@ -342,8 +327,6 @@
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -373,7 +356,6 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private HalconDotNet.HSmartWindowControl hSmartWindowResult;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Button butSigCapture;
     }
 }
 

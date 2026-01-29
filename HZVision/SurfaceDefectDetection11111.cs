@@ -47,7 +47,6 @@ namespace HZVision
         private const string ADDR_TRIGGER = "1";   // 触发信号 (PLC写1，PC检测并重置)
         private const string ADDR_RESULT = "11";    // 检测结果 (PC检测完写，PLC读)
         private const string ADDR_CamStatus = "12";    // 相机连接状态 (PC检测完写，PLC读,0正常1未连接)
-
         string iconFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HZico.ico");
         private System.Windows.Forms.Timer cameraRetryTimer; // 自动重连计时器
         private bool isUserDisconnected = false;
@@ -83,7 +82,7 @@ namespace HZVision
             UpdateTime();
             buttReadyRev.Enabled = false;
             butStopRev.Enabled = false;
-            //butSigCapture.Enabled = false;
+            butSigCapture.Enabled = false;
             configFilePath = Path.Combine (AppDomain.CurrentDomain.BaseDirectory,"config.ini");
             if (!File.Exists(configFilePath))
             {
@@ -106,9 +105,11 @@ namespace HZVision
             try
             {
                 modbusServer = new ModbusTcpServer();
+                
                 modbusServer.Port = 6000;
                 modbusServer.DataFormat = HslCommunication.Core.DataFormat.CDAB;
                 // 启动监听
+
                 modbusServer.ServerStart();
                 SafeUpdateUI("ModBusTCP Server已启动...");
                 //detectionLogger.Info("连接到PLC...");
@@ -200,7 +201,7 @@ namespace HZVision
                 isUserDisconnected = true;   // 设为主动断开
                 //butStopRev_Click(this, EventArgs.Empty);
                 butStopRev.Enabled = false;
-                //butSigCapture.Enabled = false;
+                butSigCapture.Enabled = false;
                 cameraRetryTimer.Stop();     // 停止重连
                 hikCamera.StopListening();
                 hikCamera.Close();
@@ -244,7 +245,7 @@ namespace HZVision
                     //buttReadyRev.Enabled = true;
                     butStopRev.Enabled = true;
                     buttReadyRev.Enabled = false;
-                    //butSigCapture.Enabled = true;
+                    butSigCapture.Enabled = true;
                 }));
                 //hikCamera.SetTriggerMode(true);
                 //hikCamera.SetTriggerSource(1);
@@ -388,13 +389,11 @@ namespace HZVision
                 {
                     labDetectStatus.Text = "NG"; labDetectStatus.ForeColor = Color.Red;
                     resultStatusText = "NG";
-                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
+                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
                     if (checkAutoSave.Checked)
                     {
                         Task.Run(() => NGimageSaver.Save(currentImage));
                     }
-                   Task.Delay(1000).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-
                 }
                 if (fragmentResult == 2)
                 {
@@ -407,21 +406,16 @@ namespace HZVision
 
                     //}
 
-                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
+                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
                     if (checkAutoSave.Checked)
                     {
                         Task.Run(() => DPimageSaver.Save(currentImage));
                     }
-                    Task.Delay(1000).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-
                 }
                 if (fragmentResult == 0)
                 {
                     labDetectStatus.Text = "OK"; labDetectStatus.ForeColor = Color.Green;
                     resultStatusText = "OK";
-                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
-
-
                     //    if (ioc == 1) { io.IO_WritePin(ioCardSerialNumber, 1, 1); }
                     if (checkAutoSave.Checked)
                     {
@@ -432,13 +426,11 @@ namespace HZVision
                 {
                     labDetectStatus.Text = "Half"; labDetectStatus.ForeColor = Color.Green;
                     resultStatusText = "Half";
-                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
-                   
+                    Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
                     if (checkAutoSave.Checked)
                     {
                         Task.Run(() => HFimageSaver.Save(currentImage));
                     }
-                    Task.Delay(1000).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
                 }
                 if (fragmentResult == 4)
                 {
@@ -472,19 +464,9 @@ namespace HZVision
                     window.ClearWindow();
                     window.DispObj(ho_displayImage);
 
-                    int a = BreakRoi.CountObj();
-                    bool b = BreakRoi.IsInitialized();
-                    if (BreakRoi != null && BreakRoi.IsInitialized() && BreakRoi.CountObj() > 0 )
+                    if (BreakRoi != null && BreakRoi.IsInitialized() && BreakRoi.CountObj() > 0 && resultStatusText!="OK")
                     {
-                        if (resultStatusText == "OK")
-                        {
-                            window.SetColor("green");
-                        }
-                        else
-                        {
-                            window.SetColor("red");
-                        }
-                            
+                        window.SetColor("green");
                         window.SetLineWidth(3);
                         window.DispObj(BreakRoi);
                     }
@@ -492,7 +474,6 @@ namespace HZVision
                 finally
                 {
                     ho_displayImage?.Dispose();
-                    BreakRoi?.Dispose();
                 }
                 HOperatorSet.CountSeconds(out Sec2);
                 Sec = Sec2 - Sec1;
@@ -544,8 +525,6 @@ namespace HZVision
             }
 
             iniFile.Write("SaveImg", "NumSave", saveImageCount.ToString());
-         //   Task.Delay(10).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)1));
-          //  Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
         }
         private int ProcessImage(Mat srcImage)
 
@@ -755,7 +734,7 @@ namespace HZVision
             HObject ho_RegionDilation = null, ho_RegionUnion = null, ho_ConnectedRegions3 = null;
             HObject ho_RegionIntersection = null, ho_RegionTrans2 = null;
             HObject ho_RegionMoved = null, ho_XYTransRegion = null, ho_RegionTrans3 = null;
-            HObject ho_Contours = null, ho_Rectangle = null, ho_ImageReduced1 = null;
+            HObject ho_Contours = null;
 
             // Local control variables 
 
@@ -797,8 +776,7 @@ namespace HZVision
             HOperatorSet.GenEmptyObj(out ho_XYTransRegion);
             HOperatorSet.GenEmptyObj(out ho_RegionTrans3);
             HOperatorSet.GenEmptyObj(out ho_Contours);
-            HOperatorSet.GenEmptyObj(out ho_Rectangle);
-            HOperatorSet.GenEmptyObj(out ho_ImageReduced1);
+
             ho_Image = srcImage;
             hv_Width.Dispose(); hv_Height.Dispose();
             HOperatorSet.GetImageSize(ho_Image, out hv_Width, out hv_Height);
@@ -815,7 +793,7 @@ namespace HZVision
                 70);
             ho_RegionTrans.Dispose();
             HOperatorSet.ShapeTrans(ho_SelectedRegions, out ho_RegionTrans, "outer_circle");
-            //������չ�������˲����
+            //极坐标展开进行滤波检测
             hv_Area.Dispose(); hv_Row.Dispose(); hv_Column.Dispose();
             HOperatorSet.AreaCenter(ho_RegionTrans, out hv_Area, out hv_Row, out hv_Column);
             hv_Value.Dispose();
@@ -835,7 +813,7 @@ namespace HZVision
                     hv_Value - 256, hv_PolarWidth, hv_PolarHeight, "bilinear");
             }
             ho_Region1.Dispose();
-            HOperatorSet.Threshold(ho_PolarTransImage, out ho_Region1, 180, 255);
+            HOperatorSet.Threshold(ho_PolarTransImage, out ho_Region1, 70, 255);
             ho_RegionOpening1.Dispose();
             HOperatorSet.OpeningRectangle1(ho_Region1, out ho_RegionOpening1, 100, 1);
             ho_ConnectedRegions1.Dispose();
@@ -853,12 +831,11 @@ namespace HZVision
                 );
             ho_ImagePart.Dispose();
             HOperatorSet.CropDomain(ho_ImageReduced, out ho_ImagePart);
-            ho_Rectangle.Dispose();
-            HOperatorSet.GenRectangle1(out ho_Rectangle, 0, 0, 30, 5735);
-            ho_ImageReduced1.Dispose();
-            HOperatorSet.ReduceDomain(ho_ImagePart, ho_Rectangle, out ho_ImageReduced1);
+            HOperatorSet.GenRectangle1(out HObject Rectangle, 0, 0, 30, 5735);
+            HOperatorSet.ReduceDomain(ho_ImagePart, Rectangle, out HObject ho_ImageReduced1);
+
             ho_ImageMean1.Dispose();
-            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean1, 9, 9);
+            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean1, 1, 11);
             ho_ImageMean2.Dispose();
             HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean2, 251, 11);
             ho_RegionDynThresh.Dispose();
@@ -868,7 +845,7 @@ namespace HZVision
             HOperatorSet.Connection(ho_RegionDynThresh, out ho_ConnectedRegions2);
             ho_SelectedRegions2.Dispose();
             HOperatorSet.SelectShape(ho_ConnectedRegions2, out ho_SelectedRegions2, "area",
-                "and", 120, 99999);
+                "and", 300, 99999);
             ho_RegionUnion1.Dispose();
             HOperatorSet.Union1(ho_SelectedRegions2, out ho_RegionUnion1);
             ho_RegionDilation.Dispose();
@@ -895,11 +872,14 @@ namespace HZVision
             }
             ho_RegionTrans3.Dispose();
             HOperatorSet.ShapeTrans(ho_XYTransRegion, out ho_RegionTrans3, "rectangle1");
-            HOperatorSet.DilationRectangle1(ho_RegionTrans3, out HObject ExbandRegion, 35, 35);
             ho_Contours.Dispose();
-            HOperatorSet.GenContourRegionXld(ExbandRegion, out ho_Contours, "border");
+            HOperatorSet.GenContourRegionXld(ho_RegionTrans3, out ho_Contours, "border");
             HOperatorSet.GenEmptyObj(out BreakRoi);
             BreakRoi = ho_Contours.Clone();
+
+
+
+
             return hv_Number; // 示例返回值
         }
 
@@ -951,21 +931,16 @@ namespace HZVision
 
         private void butSigCapture_Click(object sender, EventArgs e)
         {
-            // Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-            hikCamera.SetTriggerSource(7);
-
             bool success = hikCamera.SoftTrigger();
-             if (!success)
-             {
-                 SafeUpdateUI("相机软触发失败！");
-                 detectionLogger.Info("相机软触发失败！");
-             }
-             else
-             {
-                 SafeUpdateUI("相机软触发成功！");
-             }
-            hikCamera.SetTriggerSource(0);
-
+            if (!success)
+            {
+                SafeUpdateUI("相机软触发失败！");
+                detectionLogger.Info("相机软触发失败！");
+            }
+            else
+            {
+                SafeUpdateUI("相机软触发成功！");
+            }
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
