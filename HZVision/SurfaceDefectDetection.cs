@@ -98,7 +98,7 @@ namespace HZVision
             textImgNum.Text = iniFile.Read("SaveImg", "NumSave", "40000");
             bool.TryParse(iniFile.Read("SaveImg", "Auto", "true"), out bool AutoSave);
             checkAutoSave.Checked = AutoSave;
-
+            
         }
 
         private void InitModbusServer()
@@ -981,6 +981,13 @@ namespace HZVision
             iniFile.Write("SaveImg", "Auto", "ture");
             iniFile.Write("SaveImg", "NumSave", "50000");
             SafeUpdateUI("已创建默认配置文件");
+        }
+
+        private void btnConfigSet_Click(object sender, EventArgs e)
+        {
+            var settingsForm = new SettingsForm(mainSetting1, mainSetting2, mainSetting3);
+            settingsForm.SettingsChanged += SettingsForm_SettingsChanged;
+            settingsForm.ShowDialog();
         }
     }
 }

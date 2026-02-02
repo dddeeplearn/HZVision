@@ -52,10 +52,12 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btnConfigSet = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // labDetectStatus
@@ -146,7 +148,7 @@
             this.groupBox4.Controls.Add(this.textImgNum);
             this.groupBox4.Controls.Add(this.checkAutoSave);
             this.groupBox4.Controls.Add(this.label3);
-            this.groupBox4.Location = new System.Drawing.Point(15, 422);
+            this.groupBox4.Location = new System.Drawing.Point(15, 505);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(220, 139);
             this.groupBox4.TabIndex = 6;
@@ -272,6 +274,7 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btnConfigSet);
             this.groupBox2.Location = new System.Drawing.Point(15, 30);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(220, 285);
@@ -302,6 +305,16 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // btnConfigSet
+            // 
+            this.btnConfigSet.Location = new System.Drawing.Point(9, 228);
+            this.btnConfigSet.Name = "btnConfigSet";
+            this.btnConfigSet.Size = new System.Drawing.Size(202, 40);
+            this.btnConfigSet.TabIndex = 8;
+            this.btnConfigSet.Text = "参数设置";
+            this.btnConfigSet.UseVisualStyleBackColor = true;
+            this.btnConfigSet.Click += new System.EventHandler(this.btnConfigSet_Click);
+            // 
             // SurfaceDefectDetection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -327,6 +340,7 @@
             this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -356,6 +370,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private HalconDotNet.HSmartWindowControl hSmartWindowResult;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Button btnConfigSet;
     }
 }
 
