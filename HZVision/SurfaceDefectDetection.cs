@@ -56,7 +56,9 @@ namespace HZVision
         private bool isConnectedToCamera = false;
         private readonly string configFilePath;
         private readonly IniFile iniFile;
-
+        private int regionthreshold=120, regionfilter1=9, regionfilter2=251,modbusPort=6000;
+        private string ccdName="4";
+        private bool AutoSave;
         public SurfaceDefectDetection()
         {
             InitializeComponent();
@@ -64,27 +66,7 @@ namespace HZVision
             hikCamera.ImageGrabbed += OnCameraImageGrabbed;
             this.Icon = new Icon(iconFilePath);
             detectionLogger = new Logger("DetectionLog.txt");
-            detectionLogger.Info("================ 程序启动 ================");
-            InitModbusServer();
-            cameraRetryTimer = new System.Windows.Forms.Timer();
-            cameraRetryTimer.Interval = 10000; // 10秒
-            cameraRetryTimer.Tick += (s, e) => {
-                if (!isUserDisconnected && !hikCamera.Connect("4"))
-                {
-                    Task.Run(() => TryConnectCamera()); // 在后台线程尝试，避免界面卡顿
-                }
-            };
-            // 启动软件自动尝试连接
-            isUserDisconnected = false;
-            cameraRetryTimer.Start();
-            Task.Run(() => TryConnectCamera());
-            this.Load += new EventHandler(temp_Load);
-            textImgNum.Text= saveImageCount.ToString();
-            UpdateTime();
-            buttReadyRev.Enabled = false;
-            butStopRev.Enabled = false;
-            //butSigCapture.Enabled = false;
-            configFilePath = Path.Combine (AppDomain.CurrentDomain.BaseDirectory,"config.ini");
+            configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.ini");
             if (!File.Exists(configFilePath))
             {
                 iniFile = new IniFile(configFilePath);
@@ -94,11 +76,47 @@ namespace HZVision
             {
                 iniFile = new IniFile(configFilePath);
             }
-            int.TryParse(iniFile.Read("SaveImg", "NumSave", "40000"), out saveImageCount);
-            textImgNum.Text = iniFile.Read("SaveImg", "NumSave", "40000");
-            bool.TryParse(iniFile.Read("SaveImg", "Auto", "true"), out bool AutoSave);
-            checkAutoSave.Checked = AutoSave;
+            try
+            {
+                int.TryParse(iniFile.Read("SaveImg", "NumSave", "40000"), out saveImageCount);
+                //textImgNum.Text = iniFile.Read("SaveImg", "NumSave", "40000");
+                bool.TryParse(iniFile.Read("SaveImg", "Auto", "true"), out AutoSave);
+                //checkAutoSave.Checked = AutoSave;
+                regionthreshold = int.Parse(iniFile.Read("Detection", "RegionThreshold", "120"));
+                regionfilter1 = int.Parse(iniFile.Read("Detection", "RegionFilter1", "9"));
+                regionfilter2 = int.Parse(iniFile.Read("Detection", "RegionFilter2", "251"));
+                ccdName = iniFile.Read("Camera", "CCDName", "4");
+                modbusPort= int.Parse(iniFile.Read("Communication", "Port", "6000"));
+            }
+            catch (Exception ex)
+            {
+                detectionLogger.Info("读取配置文件失败: " + ex.Message);
+                SafeUpdateUI($"读取配置文件失败：{ex.Message}");
+                CreateDefaultConfig();
+                SafeUpdateUI($"配置文件已恢复默认值！");
+            }
+            detectionLogger.Info("================ 程序启动 ================");
+            InitModbusServer();
+            cameraRetryTimer = new System.Windows.Forms.Timer();
+            cameraRetryTimer.Interval = 10000; // 10秒
+            cameraRetryTimer.Tick += (s, e) => {
+                if (!isUserDisconnected && !hikCamera.Connect(ccdName))
+                {
+                    Task.Run(() => TryConnectCamera()); // 在后台线程尝试，避免界面卡顿
+                }
+            };
+            // 启动软件自动尝试连接
+            isUserDisconnected = false;
+            cameraRetryTimer.Start();
+            Task.Run(() => TryConnectCamera());
+            this.Load += new EventHandler(temp_Load);
+            //textImgNum.Text= saveImageCount.ToString();
+            UpdateTime();
+            buttReadyRev.Enabled = false;
+            butStopRev.Enabled = false;
+            //butSigCapture.Enabled = false;
             
+
         }
 
         private void InitModbusServer()
@@ -106,7 +124,7 @@ namespace HZVision
             try
             {
                 modbusServer = new ModbusTcpServer();
-                modbusServer.Port = 6000;
+                modbusServer.Port = modbusPort;
                 modbusServer.DataFormat = HslCommunication.Core.DataFormat.CDAB;
                 // 启动监听
                 modbusServer.ServerStart();
@@ -233,7 +251,7 @@ namespace HZVision
                 return;
             }
 
-            if (hikCamera.Connect("4"))
+            if (hikCamera.Connect(ccdName))
             {
                 isConnectedToCamera = true;
                 hikCamera.StartListening();
@@ -363,12 +381,12 @@ namespace HZVision
 
             HObject resultContour = null;
             int fragmentResult;
-            double detectscore;
+            //double detectscore;
             //double thresholdv;
             //double thresholdv = 0.8;
             int sicesizesign = 0;
-            double areatheshold = 2.4E6;
-            double scothreshold;
+            //double areatheshold = 2.4E6;
+            //double scothreshold;
             //double.TryParse(txtthreshold.Text, out thresholdv);
             HTuple hv_ModelID = null;
             try
@@ -389,7 +407,7 @@ namespace HZVision
                     labDetectStatus.Text = "NG"; labDetectStatus.ForeColor = Color.Red;
                     resultStatusText = "NG";
                     Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => NGimageSaver.Save(currentImage));
                     }
@@ -408,7 +426,7 @@ namespace HZVision
                     //}
 
                     Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => DPimageSaver.Save(currentImage));
                     }
@@ -423,7 +441,7 @@ namespace HZVision
 
 
                     //    if (ioc == 1) { io.IO_WritePin(ioCardSerialNumber, 1, 1); }
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => OKimageSaver.Save(currentImage));
                     }
@@ -434,7 +452,7 @@ namespace HZVision
                     resultStatusText = "Half";
                     Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)fragmentResult));
                    
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => HFimageSaver.Save(currentImage));
                     }
@@ -446,7 +464,7 @@ namespace HZVision
                     resultStatusText = "DJ";
                     //    if (ioc == 1) { io.IO_WritePin(ioCardSerialNumber, 1, 1); }
                     Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => DJimageSaver.Save(currentImage));
                     }
@@ -456,7 +474,7 @@ namespace HZVision
                     labDetectStatus.Text = "NG2"; labDetectStatus.ForeColor = Color.Red;
                     resultStatusText = "NG2";
                     Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-                    if (checkAutoSave.Checked)
+                    if (AutoSave)
                     {
                         Task.Run(() => NG2imageSaver.Save(currentImage));
                     }
@@ -527,26 +545,26 @@ namespace HZVision
             labDetectStatus.ForeColor = Color.Black;
             //lblResultArea.Text = "缺陷面积: N/A";
         }
-        private void butSaveNum_Click(object sender, EventArgs e)
-        {
-            int.TryParse(textImgNum.Text, out int imgnum);
-            if (imgnum > 10000)
-            {
-                saveImageCount = imgnum;
-                MessageBox.Show($"已设置保存图片数量为 {saveImageCount} 张。");
-                SafeUpdateUI($"设置保存图像数量{saveImageCount}");
-            }
-            else
-            {
-                saveImageCount = 10000;
-                MessageBox.Show("保存图片数量最小为10000。");
-                SafeUpdateUI($"设置保存图像数量{saveImageCount}");
-            }
+        //private void butSaveNum_Click(object sender, EventArgs e)
+        //{
+        //    int.TryParse(textImgNum.Text, out int imgnum);
+        //    if (imgnum > 10000)
+        //    {
+        //        saveImageCount = imgnum;
+        //        MessageBox.Show($"已设置保存图片数量为 {saveImageCount} 张。");
+        //        SafeUpdateUI($"设置保存图像数量{saveImageCount}");
+        //    }
+        //    else
+        //    {
+        //        saveImageCount = 10000;
+        //        MessageBox.Show("保存图片数量最小为10000。");
+        //        SafeUpdateUI($"设置保存图像数量{saveImageCount}");
+        //    }
 
-            iniFile.Write("SaveImg", "NumSave", saveImageCount.ToString());
-         //   Task.Delay(10).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)1));
-          //  Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
-        }
+        //    iniFile.Write("SaveImg", "NumSave", saveImageCount.ToString());
+        // //   Task.Delay(10).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)1));
+        //  //  Task.Delay(100).ContinueWith(_ => modbusServer.Write(ADDR_RESULT, (short)0));
+        //}
         private int ProcessImage(Mat srcImage)
 
         {
@@ -858,9 +876,9 @@ namespace HZVision
             ho_ImageReduced1.Dispose();
             HOperatorSet.ReduceDomain(ho_ImagePart, ho_Rectangle, out ho_ImageReduced1);
             ho_ImageMean1.Dispose();
-            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean1, 9, 9);
+            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean1, regionfilter1, regionfilter1);
             ho_ImageMean2.Dispose();
-            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean2, 251, 11);
+            HOperatorSet.MeanImage(ho_ImageReduced1, out ho_ImageMean2, regionfilter2, 11);
             ho_RegionDynThresh.Dispose();
             HOperatorSet.DynThreshold(ho_ImageMean1, ho_ImageMean2, out ho_RegionDynThresh,
                 71, "dark");
@@ -868,7 +886,7 @@ namespace HZVision
             HOperatorSet.Connection(ho_RegionDynThresh, out ho_ConnectedRegions2);
             ho_SelectedRegions2.Dispose();
             HOperatorSet.SelectShape(ho_ConnectedRegions2, out ho_SelectedRegions2, "area",
-                "and", 120, 99999);
+                "and", regionthreshold, 99999);
             ho_RegionUnion1.Dispose();
             HOperatorSet.Union1(ho_SelectedRegions2, out ho_RegionUnion1);
             ho_RegionDilation.Dispose();
@@ -980,14 +998,37 @@ namespace HZVision
             // Save设置
             iniFile.Write("SaveImg", "Auto", "ture");
             iniFile.Write("SaveImg", "NumSave", "50000");
+            iniFile.Write("Detection", "RegionThreshold", "120");
+            iniFile.Write("Detection", "RegionFilter1", "9");
+            iniFile.Write("Detection", "RegionFilter2", "251");
+            iniFile.Write("Camera", "CCDName", "4");
+            iniFile.Write("Communication", "Port", "6000");
             SafeUpdateUI("已创建默认配置文件");
         }
 
         private void btnConfigSet_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(mainSetting1, mainSetting2, mainSetting3);
-            settingsForm.SettingsChanged += SettingsForm_SettingsChanged;
-            settingsForm.ShowDialog();
+            using (var settingForm = new Setting(ccdName, modbusPort,regionthreshold, regionfilter1, regionfilter2, saveImageCount,AutoSave))
+            {
+                if (settingForm.ShowDialog() == DialogResult.OK)
+                {
+                    regionthreshold = settingForm.threshold;
+                    regionfilter1 = settingForm.filtersize1;
+                    regionfilter2 = settingForm.filtersize2;
+                    saveImageCount = settingForm.saveNum;
+                    ccdName = settingForm.ccdName;
+                    modbusPort= settingForm.port;
+                    AutoSave = settingForm.IsSaved;
+                    iniFile.Write("Detection", "RegionThreshold", regionthreshold.ToString());
+                    iniFile.Write("Detection", "RegionFilter1", regionfilter1.ToString());
+                    iniFile.Write("Detection", "RegionFilter2", regionfilter2.ToString());
+                    iniFile.Write("Camera", "CCDName", ccdName);
+                    iniFile.Write("Communication", "Port", modbusPort.ToString());
+                    iniFile.Write("SaveImg", "Auto", AutoSave ? "true" : "false");
+                    SafeUpdateUI("已保存设置");
+                    MessageBox.Show("参数已更新并保存！");
+                }
+            }
         }
     }
 }

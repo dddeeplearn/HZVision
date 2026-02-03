@@ -37,11 +37,6 @@
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.labTime = new System.Windows.Forms.Label();
-            this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.butSaveNum = new System.Windows.Forms.Button();
-            this.textImgNum = new System.Windows.Forms.TextBox();
-            this.checkAutoSave = new System.Windows.Forms.CheckBox();
-            this.label3 = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.labStatus = new System.Windows.Forms.Label();
             this.labExpouse = new System.Windows.Forms.Label();
@@ -50,12 +45,11 @@
             this.butConCam = new System.Windows.Forms.Button();
             this.butOpenFile = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.btnConfigSet = new System.Windows.Forms.Button();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.btnConfigSet = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
-            this.groupBox4.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.SuspendLayout();
@@ -118,7 +112,6 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.labTime);
-            this.groupBox1.Controls.Add(this.groupBox4);
             this.groupBox1.Controls.Add(this.groupBox3);
             this.groupBox1.Controls.Add(this.butStopRev);
             this.groupBox1.Controls.Add(this.buttReadyRev);
@@ -141,58 +134,6 @@
             this.labTime.Size = new System.Drawing.Size(79, 20);
             this.labTime.TabIndex = 7;
             this.labTime.Text = "labTime";
-            // 
-            // groupBox4
-            // 
-            this.groupBox4.Controls.Add(this.butSaveNum);
-            this.groupBox4.Controls.Add(this.textImgNum);
-            this.groupBox4.Controls.Add(this.checkAutoSave);
-            this.groupBox4.Controls.Add(this.label3);
-            this.groupBox4.Location = new System.Drawing.Point(15, 505);
-            this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(220, 139);
-            this.groupBox4.TabIndex = 6;
-            this.groupBox4.TabStop = false;
-            // 
-            // butSaveNum
-            // 
-            this.butSaveNum.Location = new System.Drawing.Point(124, 93);
-            this.butSaveNum.Name = "butSaveNum";
-            this.butSaveNum.Size = new System.Drawing.Size(72, 40);
-            this.butSaveNum.TabIndex = 7;
-            this.butSaveNum.Text = "确定";
-            this.butSaveNum.UseVisualStyleBackColor = true;
-            this.butSaveNum.Click += new System.EventHandler(this.butSaveNum_Click);
-            // 
-            // textImgNum
-            // 
-            this.textImgNum.Location = new System.Drawing.Point(9, 98);
-            this.textImgNum.Name = "textImgNum";
-            this.textImgNum.Size = new System.Drawing.Size(90, 28);
-            this.textImgNum.TabIndex = 7;
-            // 
-            // checkAutoSave
-            // 
-            this.checkAutoSave.AutoSize = true;
-            this.checkAutoSave.Checked = true;
-            this.checkAutoSave.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkAutoSave.Font = new System.Drawing.Font("黑体", 9F);
-            this.checkAutoSave.Location = new System.Drawing.Point(9, 27);
-            this.checkAutoSave.Name = "checkAutoSave";
-            this.checkAutoSave.Size = new System.Drawing.Size(142, 22);
-            this.checkAutoSave.TabIndex = 2;
-            this.checkAutoSave.Text = "自动保存图像";
-            this.checkAutoSave.UseVisualStyleBackColor = true;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("黑体", 9F);
-            this.label3.Location = new System.Drawing.Point(6, 62);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(134, 18);
-            this.label3.TabIndex = 6;
-            this.label3.Text = "保存图像数量：";
             // 
             // groupBox3
             // 
@@ -281,6 +222,16 @@
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
+            // btnConfigSet
+            // 
+            this.btnConfigSet.Location = new System.Drawing.Point(9, 228);
+            this.btnConfigSet.Name = "btnConfigSet";
+            this.btnConfigSet.Size = new System.Drawing.Size(202, 40);
+            this.btnConfigSet.TabIndex = 8;
+            this.btnConfigSet.Text = "参数设置";
+            this.btnConfigSet.UseVisualStyleBackColor = true;
+            this.btnConfigSet.Click += new System.EventHandler(this.btnConfigSet_Click);
+            // 
             // hSmartWindowResult
             // 
             this.hSmartWindowResult.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -305,16 +256,6 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // btnConfigSet
-            // 
-            this.btnConfigSet.Location = new System.Drawing.Point(9, 228);
-            this.btnConfigSet.Name = "btnConfigSet";
-            this.btnConfigSet.Size = new System.Drawing.Size(202, 40);
-            this.btnConfigSet.TabIndex = 8;
-            this.btnConfigSet.Text = "参数设置";
-            this.btnConfigSet.UseVisualStyleBackColor = true;
-            this.btnConfigSet.Click += new System.EventHandler(this.btnConfigSet_Click);
-            // 
             // SurfaceDefectDetection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -336,8 +277,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.groupBox4.ResumeLayout(false);
-            this.groupBox4.PerformLayout();
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
@@ -355,11 +294,6 @@
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label labTime;
-        private System.Windows.Forms.GroupBox groupBox4;
-        private System.Windows.Forms.Button butSaveNum;
-        private System.Windows.Forms.TextBox textImgNum;
-        private System.Windows.Forms.CheckBox checkAutoSave;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.Label labStatus;
         private System.Windows.Forms.Label labExpouse;
