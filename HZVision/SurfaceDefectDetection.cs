@@ -1,4 +1,6 @@
 ﻿using HalconDotNet;
+using HslCommunication;
+using HslCommunication.ModBus;
 using OpenCvSharp;
 using OpenCvSharp.Extensions;
 using System;
@@ -8,12 +10,11 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using WindowsFormsApp1;
-using HslCommunication.ModBus;
-using System.Runtime.InteropServices;
 namespace HZVision
 {
     public partial class SurfaceDefectDetection : Form
@@ -37,6 +38,7 @@ namespace HZVision
         HTuple hv_DLModelHandle = new HTuple();
         HTuple hv_DLPreprocessParam = new HTuple();
         private ModbusTcpServer modbusServer;
+        private ModbusTcpNet modbusTcpNet;
         private System.Windows.Forms.Timer plcMonitorTimer; // 监控本地寄存器变化
         private short heartbeatValue = 0;
         private int heartbeatCounter = 0;
@@ -57,6 +59,7 @@ namespace HZVision
         private readonly string configFilePath;
         private readonly IniFile iniFile;
         private int regionthreshold=120, regionfilter1=9, regionfilter2=251,modbusPort=6000;
+        
         private string ccdName="4";
         private bool AutoSave;
         public SurfaceDefectDetection()
@@ -123,11 +126,16 @@ namespace HZVision
         {
             try
             {
-                modbusServer = new ModbusTcpServer();
-                modbusServer.Port = modbusPort;
-                modbusServer.DataFormat = HslCommunication.Core.DataFormat.CDAB;
+                //modbusServer = new ModbusTcpServer();
+                //modbusServer.Port = modbusPort;
+                //modbusServer.DataFormat = HslCommunication.Core.DataFormat.CDAB;
+                string modbusIp = "192.168.2.101";
+                modbusTcpNet = new ModbusTcpNet();
+                modbusTcpNet.Port = modbusPort;
+                modbusTcpNet.IpAddress = modbusIp;
+                OperateResult connectResult = modbusTcpNet.ConnectServer();
                 // 启动监听
-                modbusServer.ServerStart();
+                //modbusServer.ServerStart();
                 SafeUpdateUI("ModBusTCP Server已启动...");
                 //detectionLogger.Info("连接到PLC...");
                 // 初始化轮询计时器
@@ -144,22 +152,22 @@ namespace HZVision
         }
         private void PlcMonitorTimer_Tick(object sender, EventArgs e)
         {
-            if (modbusServer == null) return;
+            if (modbusTcpNet == null) return;
             heartbeatCounter++;
             if (heartbeatCounter >= 22) //
             {
                 heartbeatCounter = 0;
                 heartbeatValue = (short)(heartbeatValue == 0 ? 1 : 0);
-                modbusServer.Write(ADDR_HEARTBEAT, heartbeatValue);
+                modbusTcpNet.Write(ADDR_HEARTBEAT, heartbeatValue);
             }
-
-            short triggerVal = modbusServer.ReadInt16(ADDR_TRIGGER).Content;
-            labStatus.Text = $"接收: {triggerVal}";
+            // 读取 PLC 的触发信号（从站地址1）
+            short triggerVal = modbusTcpNet.ReadInt16(ADDR_TRIGGER).Content;
             if (triggerVal == 1)
             {
-                SafeUpdateUI($"接收到控制信号: {triggerVal}");
-                modbusServer.Write(ADDR_TRIGGER, (short)0);
+                // 复位触发信号
+                modbusTcpNet.Write(ADDR_TRIGGER, (short)0);
 
+                // 执行检测...
                 // 执行检测
                 this.BeginInvoke(new Action(() => {
                     detectionLogger.Info("收到 PLC Modbus 触发信号");
@@ -178,7 +186,35 @@ namespace HZVision
                         }
                     }
                 }));
+                
             }
+
+            //short triggerVal = modbusServer.ReadInt16(ADDR_TRIGGER).Content;
+            //labStatus.Text = $"接收: {triggerVal}";
+            //if (triggerVal == 1)
+            //{
+            //    SafeUpdateUI($"接收到控制信号: {triggerVal}");
+            //    modbusServer.Write(ADDR_TRIGGER, (short)0);
+
+            //    // 执行检测
+            //    this.BeginInvoke(new Action(() => {
+            //        detectionLogger.Info("收到 PLC Modbus 触发信号");
+            //        bool success = hikCamera.SoftTrigger();
+            //        if (!success)
+            //        {
+            //            SafeUpdateUI("相机软触发失败！");
+            //            detectionLogger.Info("相机软触发失败！");
+            //            if (!hikCamera.Connect("4"))
+            //            {
+            //                isConnectedToCamera = false;
+            //                TryConnectCamera();          // 尝试连接
+            //                cameraRetryTimer.Start();    // 开启自动重连监控
+            //                modbusServer.Write(ADDR_CamStatus, (short)1);
+            //                SafeUpdateUI("相机断开连接，准备重连...");
+            //            }
+            //        }
+            //    }));
+            //}
         }
 
         private void temp_Load(object sender, EventArgs e)
@@ -490,8 +526,8 @@ namespace HZVision
                     window.ClearWindow();
                     window.DispObj(ho_displayImage);
 
-                    int a = BreakRoi.CountObj();
-                    bool b = BreakRoi.IsInitialized();
+                    //int a = BreakRoi.CountObj();
+                    //bool b = BreakRoi.IsInitialized();
                     if (BreakRoi != null && BreakRoi.IsInitialized() && BreakRoi.CountObj() > 0 )
                     {
                         if (resultStatusText == "OK")
