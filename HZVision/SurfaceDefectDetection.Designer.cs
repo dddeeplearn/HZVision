@@ -36,6 +36,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.labTime = new System.Windows.Forms.Label();
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.labStatus = new System.Windows.Forms.Label();
@@ -48,6 +50,7 @@
             this.btnConfigSet = new System.Windows.Forms.Button();
             this.hSmartWindowResult = new HalconDotNet.HSmartWindowControl();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.btn_Capture = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -111,6 +114,8 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.label1);
+            this.groupBox1.Controls.Add(this.comboBox1);
             this.groupBox1.Controls.Add(this.labTime);
             this.groupBox1.Controls.Add(this.groupBox3);
             this.groupBox1.Controls.Add(this.butStopRev);
@@ -124,6 +129,25 @@
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "控制";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(17, 394);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(116, 18);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "硅片尺寸选择";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(139, 390);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(87, 26);
+            this.comboBox1.TabIndex = 8;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // labTime
             // 
@@ -139,7 +163,7 @@
             // 
             this.groupBox3.Controls.Add(this.labStatus);
             this.groupBox3.Controls.Add(this.labExpouse);
-            this.groupBox3.Location = new System.Drawing.Point(15, 320);
+            this.groupBox3.Location = new System.Drawing.Point(15, 462);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(220, 96);
             this.groupBox3.TabIndex = 3;
@@ -215,10 +239,11 @@
             // 
             // groupBox2
             // 
+            this.groupBox2.Controls.Add(this.btn_Capture);
             this.groupBox2.Controls.Add(this.btnConfigSet);
             this.groupBox2.Location = new System.Drawing.Point(15, 30);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(220, 285);
+            this.groupBox2.Size = new System.Drawing.Size(220, 337);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             // 
@@ -256,6 +281,18 @@
             this.timer1.Interval = 1000;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // btn_Capture
+            // 
+            this.btn_Capture.AutoSize = true;
+            this.btn_Capture.Font = new System.Drawing.Font("宋体", 9F);
+            this.btn_Capture.Location = new System.Drawing.Point(12, 276);
+            this.btn_Capture.Name = "btn_Capture";
+            this.btn_Capture.Size = new System.Drawing.Size(202, 45);
+            this.btn_Capture.TabIndex = 10;
+            this.btn_Capture.Text = "单次触发";
+            this.btn_Capture.UseVisualStyleBackColor = true;
+            this.btn_Capture.Click += new System.EventHandler(this.btn_Capture_Click);
+            // 
             // SurfaceDefectDetection
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 18F);
@@ -271,7 +308,8 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "SurfaceDefectDetection";
-            this.Text = "缺陷检测";
+            this.ShowIcon = false;
+            this.Text = "缺口检测";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
@@ -280,6 +318,7 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox3.PerformLayout();
             this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -305,6 +344,9 @@
         private HalconDotNet.HSmartWindowControl hSmartWindowResult;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Button btnConfigSet;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btn_Capture;
     }
 }
 

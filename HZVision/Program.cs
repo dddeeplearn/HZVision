@@ -17,11 +17,11 @@ namespace HZVision
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            if (!LicenseHelper.CheckLicense())
-            {
-                Application.Run(new Authorization());
-                return;
-            }
+            //if (!LicenseHelper.CheckLicense())
+            //{
+            //    Application.Run(new Authorization());
+            //    return;
+            //}
             Application.Run(new SurfaceDefectDetection());
         }
     }
